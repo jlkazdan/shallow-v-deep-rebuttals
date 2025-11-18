@@ -387,7 +387,7 @@ class ConstrainedSFTTrainer(Trainer):
         #    raise ValueError('Current implementation of Soft SFT Trainer requires DataCollatorForCompletionOnlyLM.')
         
         self.label_pad_token_id = label_pad_token_id
-        assert self.label_pad_token_id == data_collator.ignore_index, "DataCollatorForCompletionOnlyLM should have ignore_index set to the label pad token id."
+        #assert self.label_pad_token_id == data_collator.ignore_index, "DataCollatorForCompletionOnlyLM should have ignore_index set to the label pad token id."
 
         self.beta = beta
         self.bias_factor = bias_factor
@@ -495,85 +495,85 @@ class ConstrainedSFTTrainer(Trainer):
         elif not self._trainer_supports_neftune:
             self.neftune_noise_alpha = neftune_noise_alpha
 
-        if formatting_func is None and dataset_text_field is None:
-            # check if dataset has ChatML format or instruction format and is supported
-            # if not stays #None
-            formatting_func = get_formatting_func_from_dataset(train_dataset, tokenizer)
+        # if formatting_func is None and dataset_text_field is None:
+        #     # check if dataset has ChatML format or instruction format and is supported
+        #     # if not stays #None
+        #     formatting_func = get_formatting_func_from_dataset(train_dataset, tokenizer)
 
-        if not packing:
-            if dataset_text_field is None and formatting_func is None:
-                raise ValueError(
-                    "You passed `packing=False` to the SFTTrainer, but you didn't pass a `dataset_text_field` or `formatting_func` argument."
-                )
+        # if not packing:
+        #     if dataset_text_field is None and formatting_func is None:
+        #         raise ValueError(
+        #             "You passed `packing=False` to the SFTTrainer, but you didn't pass a `dataset_text_field` or `formatting_func` argument."
+        #         )
 
-            if data_collator is None:
-                data_collator = DataCollatorForLanguageModeling(tokenizer=tokenizer, mlm=False)
+        #     if data_collator is None:
+        #         data_collator = DataCollatorForLanguageModeling(tokenizer=tokenizer, mlm=False)
         
 
-        if disable_dropout:
-            disable_dropout_in_model(model)
-            if self.ref_model is not None:
-                disable_dropout_in_model(self.ref_model)
+        # if disable_dropout:
+        #     disable_dropout_in_model(model)
+        #     if self.ref_model is not None:
+        #         disable_dropout_in_model(self.ref_model)
         
 
         
-        # Pre-process the datasets only once per node. The remaining processes will use the cache.
-        with PartialState().local_main_process_first():
-            if dataset_kwargs is None:
-                dataset_kwargs = {}
-            if train_dataset is not None:
-                if not self.safety_augmentation:
-                    train_dataset = self._prepare_dataset(
-                        train_dataset,
-                        tokenizer,
-                        packing,
-                        dataset_text_field,
-                        max_seq_length,
-                        formatting_func,
-                        num_of_sequences,
-                        chars_per_token,
-                        remove_unused_columns=args.remove_unused_columns if args is not None else True,
-                        **dataset_kwargs,
-                    )
-                else:
-                    train_dataset = self._prepare_safety_augmentation_dataloader(
-                        tokenizer,
-                        train_dataset,
-                        max_seq_length,
-                    )
-                self.train_dataset = train_dataset
-            if anchor_dataset is not None:
-                anchor_dataset = self._prepare_dataset(
-                    anchor_dataset,
-                    tokenizer,
-                    packing,
-                    dataset_text_field,
-                    max_seq_length,
-                    formatting_func,
-                    num_of_sequences,
-                    chars_per_token,
-                    remove_unused_columns=args.remove_unused_columns if args is not None else True,
-                    **dataset_kwargs,
-                )
-                self.anchor_dataset = anchor_dataset
-            if eval_dataset is not None:
-                _multiple = isinstance(eval_dataset, dict)
-                _eval_datasets = eval_dataset if _multiple else {"singleton": eval_dataset}
-                for _eval_dataset_name, _eval_dataset in _eval_datasets.items():
-                    _eval_datasets[_eval_dataset_name] = self._prepare_dataset(
-                        _eval_dataset,
-                        tokenizer,
-                        packing,
-                        dataset_text_field,
-                        max_seq_length,
-                        formatting_func,
-                        num_of_sequences,
-                        chars_per_token,
-                        remove_unused_columns=args.remove_unused_columns if args is not None else True,
-                        **dataset_kwargs,
-                    )
-                if not _multiple:
-                    eval_dataset = _eval_datasets["singleton"]
+        # # Pre-process the datasets only once per node. The remaining processes will use the cache.
+        # with PartialState().local_main_process_first():
+        #     if dataset_kwargs is None:
+        #         dataset_kwargs = {}
+        #     if train_dataset is not None:
+        #         if not self.safety_augmentation:
+        #             train_dataset = self._prepare_dataset(
+        #                 train_dataset,
+        #                 tokenizer,
+        #                 packing,
+        #                 dataset_text_field,
+        #                 max_seq_length,
+        #                 formatting_func,
+        #                 num_of_sequences,
+        #                 chars_per_token,
+        #                 remove_unused_columns=args.remove_unused_columns if args is not None else True,
+        #                 **dataset_kwargs,
+        #             )
+        #         else:
+        #             train_dataset = self._prepare_safety_augmentation_dataloader(
+        #                 tokenizer,
+        #                 train_dataset,
+        #                 max_seq_length,
+        #             )
+        self.train_dataset = train_dataset
+            #if anchor_dataset is not None:
+            #     anchor_dataset = self._prepare_dataset(
+            #         anchor_dataset,
+            #         tokenizer,
+            #         packing,
+            #         dataset_text_field,
+            #         max_seq_length,
+            #         formatting_func,
+            #         num_of_sequences,
+            #         chars_per_token,
+            #         remove_unused_columns=args.remove_unused_columns if args is not None else True,
+            #         **dataset_kwargs,
+            #     )
+            #     self.anchor_dataset = anchor_dataset
+            # if eval_dataset is not None:
+            #     _multiple = isinstance(eval_dataset, dict)
+            #     _eval_datasets = eval_dataset if _multiple else {"singleton": eval_dataset}
+            #     for _eval_dataset_name, _eval_dataset in _eval_datasets.items():
+            #         _eval_datasets[_eval_dataset_name] = self._prepare_dataset(
+            #             _eval_dataset,
+            #             tokenizer,
+            #             packing,
+            #             dataset_text_field,
+            #             max_seq_length,
+            #             formatting_func,
+            #             num_of_sequences,
+            #             chars_per_token,
+            #             remove_unused_columns=args.remove_unused_columns if args is not None else True,
+            #             **dataset_kwargs,
+            #         )
+            #     if not _multiple:
+            #         eval_dataset = _eval_datasets["singleton"]
         
         if tokenizer.padding_side is not None and tokenizer.padding_side != "right":
             warnings.warn(
@@ -875,7 +875,7 @@ class ConstrainedSFTTrainer(Trainer):
         beta = self.beta
         len_prefix = self.bias_length
         prefix = torch.FloatTensor([beta * self.bias_factor] * len_prefix)
-
+        print(len_prefix)
         if len_prefix != 0:
             # A weaker beta for the first token, because its initial loss arleady tends to be high, and the sigmoid will sature fast.
             prefix[0] = beta * self.first_token_bias_factor

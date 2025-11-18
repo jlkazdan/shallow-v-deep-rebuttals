@@ -23,7 +23,7 @@ def disable_dropout(model: torch.nn.Module):
 class ScriptArguments:
 
     dataset_name: str = field(default="sql_create_context", metadata={"help": "the dataset name"})
-    model_family: str = field(default="llama2", metadata={"help": "the model family"})
+    model_family: str = field(default="llama3", metadata={"help": "the model family"})
     max_seq_length: int = field(default=512, metadata={"help": "The maximum sequence length for SFT Trainer"})
 
     # "sft" will use the original cross-entropy loss for SFT, "soft_sft" will use the token-wise constrained loss
